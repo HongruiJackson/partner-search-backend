@@ -17,7 +17,7 @@ public class UserMapperTest {
     private UserMapper userMapper;
 
     @Test
-    public void selectAllByTagsTest() {
+    public void selectAllByAnyTagTest() {
         List<String> tags = new ArrayList<>();
 //        tags.add("Java");
         tags.add("Python");
@@ -27,6 +27,19 @@ public class UserMapperTest {
         List<String> jsonTagList = tags.stream().map(gson::toJson).toList();
         System.out.println(jsonTagList);
         List<User> users = userMapper.selectAllByAnyTag(jsonTagList);
+        System.out.println(users);
+
+    }
+
+    @Test
+    public void selectAllByAllTagsTest() {
+        List<String> tags = new ArrayList<>();
+        tags.add("Java");
+        tags.add("Python");
+//        tags.add("js");
+        Gson gson = new Gson();
+        String json = gson.toJson(tags);
+        List<User> users = userMapper.selectAllByAllTags(json);
         System.out.println(users);
 
     }

@@ -20,6 +20,16 @@ public interface UserMapper extends BaseMapper<User> {
      * @return 搜到的用户信息
      */
     List<User> selectAllByAnyTag(List<String> tags);
+
+    /**
+     * 根据标签查询用户
+     * 满足所有的条件才满足条件
+     * @param tags 前端传入的标签
+     * @return 搜到的用户信息
+     */
+    List<User> selectAllByAllTags(String tags);
+
+
 }
 
 

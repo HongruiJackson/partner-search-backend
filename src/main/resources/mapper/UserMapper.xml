@@ -37,4 +37,11 @@
             </foreach>
         </if>
     </select>
+    <select id="selectAllByAllTags" resultMap="BaseResultMap">
+        select * from user
+        <if test='tags != null'>
+            where
+                JSON_CONTAINS(tags, #{tags})
+        </if>
+    </select>
 </mapper>

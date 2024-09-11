@@ -59,4 +59,11 @@ public interface UserService extends IService<User> {
      * @param httpServletRequest getSession
      */
     Integer userLogout(HttpServletRequest httpServletRequest);
+
+    /**
+     * 根据标签搜索用户
+     * @param tags 用户搜索对象具有的标签
+     * @return 搜索到的用户信息
+     */
+    List<User> searchUserByTags(List<String> tags);
 }

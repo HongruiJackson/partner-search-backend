@@ -1,7 +1,9 @@
 package com.jackson.partnersearchbackend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import com.jackson.partnersearchbackend.enums.ErrorCode;
 import com.jackson.partnersearchbackend.exception.BusinessException;
 import com.jackson.partnersearchbackend.mapper.UserMapper;
@@ -174,6 +176,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.eq("id", id);
         int delete = userMapper.delete(queryWrapper);
         return delete == 1;
+    }
+
+    @Override
+    public List<User> searchUserByTags(List<String> tags) {
+        if (CollectionUtils.isEmpty(tags)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Gson gson = new Gson();
+        String jsonTags = gson.toJson(tags);
+        List<User> userList = userMapper.selectAllByAllTags(jsonTags);
+
+        return userList.stream().map(this::getSafetyUser).toList();
     }
 }
 

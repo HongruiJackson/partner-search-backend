@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
+import com.baomidou.mybatisplus.extension.handlers.GsonTypeHandler;
 import lombok.Data;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 
@@ -13,7 +16,7 @@ import org.springframework.boot.configurationprocessor.json.JSONArray;
  * 用户表
  * @TableName user
  */
-@TableName(value ="user")
+@TableName(value ="user",autoResultMap = true)
 @Data
 public class User implements Serializable {
     /**
@@ -35,7 +38,8 @@ public class User implements Serializable {
     /**
      * 用户具有的标签
      */
-    private Object tags;
+    @TableField(typeHandler = GsonTypeHandler.class)
+    private List<String> tags;
 
     /**
      * 用户昵称

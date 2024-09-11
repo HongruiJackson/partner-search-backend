@@ -8,7 +8,7 @@
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userAccount" column="user_account" jdbcType="VARCHAR"/>
             <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
-            <result property="tags" column="tags" jdbcType="OTHER"/>
+            <result property="tags" column="tags" jdbcType="OTHER" typeHandler="com.baomidou.mybatisplus.extension.handlers.GsonTypeHandler"/>
             <result property="username" column="username" jdbcType="VARCHAR"/>
             <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
             <result property="gender" column="gender" jdbcType="TINYINT"/>

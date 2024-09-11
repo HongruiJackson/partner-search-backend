@@ -28,7 +28,7 @@
         user_status,user_role,create_time,
         update_time,id_delete
     </sql>
-    <select id="selectAllByTags" resultMap="BaseResultMap">
+    <select id="selectAllByAnyTag" resultMap="BaseResultMap">
         select * from user
         <if test='tags != null and tags.size() > 0'>
             where

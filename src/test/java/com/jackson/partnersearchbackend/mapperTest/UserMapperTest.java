@@ -1,7 +1,6 @@
 package com.jackson.partnersearchbackend.mapperTest;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.jackson.partnersearchbackend.mapper.UserMapper;
 import com.jackson.partnersearchbackend.model.domain.User;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ public class UserMapperTest {
 
         List<String> jsonTagList = tags.stream().map(gson::toJson).toList();
         System.out.println(jsonTagList);
-        List<User> users = userMapper.selectAllByTags(jsonTagList);
+        List<User> users = userMapper.selectAllByAnyTag(jsonTagList);
         System.out.println(users);
 
     }

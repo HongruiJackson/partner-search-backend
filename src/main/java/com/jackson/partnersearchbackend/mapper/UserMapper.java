@@ -3,6 +3,8 @@ package com.jackson.partnersearchbackend.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jackson.partnersearchbackend.model.domain.User;
 
+import java.util.List;
+
 /**
 * @author 10240
 * @description 针对表【user(用户表)】的数据库操作Mapper
@@ -11,6 +13,7 @@ import com.jackson.partnersearchbackend.model.domain.User;
 */
 public interface UserMapper extends BaseMapper<User> {
 
+    List<User> selectAllByTags(List<String> tags);
 }
 
 

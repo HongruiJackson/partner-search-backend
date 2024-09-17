@@ -186,8 +186,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Gson gson = new Gson();
         String jsonTags = gson.toJson(tags);
         List<User> userList = userMapper.selectAllByAllTags(jsonTags);
+        if (CollectionUtils.isNotEmpty(userList)) return userList.stream().map(this::getSafetyUser).toList();
+        else return null;
 
-        return userList.stream().map(this::getSafetyUser).toList();
     }
 }
 

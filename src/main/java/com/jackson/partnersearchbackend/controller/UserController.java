@@ -139,5 +139,19 @@ public class UserController {
         return ResultUtils.success(result, SuccessCode.COMMON_SUCCESS);
     }
 
+    /**
+     * 根据标签查找用户
+     * 查找到的用户需要具备选择的所有的标签
+     * @param tags 用户选中的tags
+     * @return 查询到的用户
+     */
+    @PostMapping("/search/tags/all")
+    public BaseResponse<List<User>> searchUserByTags(@RequestBody List<String> tags) {
+        List<User> userList = userService.searchUserByTags(tags);
+        return ResultUtils.success(userList, SuccessCode.COMMON_SUCCESS);
+
+    }
+
+
 
 }

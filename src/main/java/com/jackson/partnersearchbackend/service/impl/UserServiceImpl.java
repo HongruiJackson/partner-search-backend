@@ -145,6 +145,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         anonymizedUser.setUserAccount(user.getUserAccount());
         anonymizedUser.setUsername(user.getUsername());
         anonymizedUser.setTags(user.getTags());
+        anonymizedUser.setProfile(user.getProfile());
         anonymizedUser.setAvatarUrl(user.getAvatarUrl());
         anonymizedUser.setGender(user.getGender());
         anonymizedUser.setPhone(user.getPhone());

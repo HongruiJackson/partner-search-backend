@@ -39,6 +39,11 @@ public class User implements Serializable {
     private List<String> tags;
 
     /**
+     * 用户简介
+     */
+    private String profile;
+
+    /**
      * 用户昵称
      */
     private String username;
@@ -108,6 +113,7 @@ public class User implements Serializable {
                 && (this.getUserAccount() == null ? other.getUserAccount() == null : this.getUserAccount().equals(other.getUserAccount()))
                 && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
                 && (this.getTags() == null ? other.getTags() == null : this.getTags().equals(other.getTags()))
+                && (this.getProfile() == null ? other.getProfile() == null : this.getProfile().equals(other.getProfile()))
                 && (this.getUsername() == null ? other.getUsername() == null : this.getUsername().equals(other.getUsername()))
                 && (this.getAvatarUrl() == null ? other.getAvatarUrl() == null : this.getAvatarUrl().equals(other.getAvatarUrl()))
                 && (this.getGender() == null ? other.getGender() == null : this.getGender().equals(other.getGender()))
@@ -128,6 +134,7 @@ public class User implements Serializable {
         result = prime * result + ((getUserAccount() == null) ? 0 : getUserAccount().hashCode());
         result = prime * result + ((getUserPassword() == null) ? 0 : getUserPassword().hashCode());
         result = prime * result + ((getTags() == null) ? 0 : getTags().hashCode());
+        result = prime * result + ((getProfile() == null) ? 0 : getProfile().hashCode());
         result = prime * result + ((getUsername() == null) ? 0 : getUsername().hashCode());
         result = prime * result + ((getAvatarUrl() == null) ? 0 : getAvatarUrl().hashCode());
         result = prime * result + ((getGender() == null) ? 0 : getGender().hashCode());
@@ -151,6 +158,7 @@ public class User implements Serializable {
         sb.append(", userAccount=").append(userAccount);
         sb.append(", userPassword=").append(userPassword);
         sb.append(", tags=").append(tags);
+        sb.append(", profile=").append(profile);
         sb.append(", username=").append(username);
         sb.append(", avatarUrl=").append(avatarUrl);
         sb.append(", gender=").append(gender);

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -188,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String jsonTags = gson.toJson(tags);
         List<User> userList = userMapper.selectAllByAllTags(jsonTags);
         if (CollectionUtils.isNotEmpty(userList)) return userList.stream().map(this::getSafetyUser).toList();
-        else return null;
+        else return new ArrayList<>();
 
     }
 }

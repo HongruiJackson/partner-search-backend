@@ -146,7 +146,7 @@ public class UserController {
      * @return 查询到的用户
      */
     @PostMapping("/search/tags/all")
-    public BaseResponse<List<User>> searchUserByTags(@RequestBody List<String> tags) {
+    public BaseResponse<List<User>> searchUserByTags(@RequestBody(required = false) List<String> tags) {
         List<User> userList = userService.searchUserByTags(tags);
         return ResultUtils.success(userList, SuccessCode.COMMON_SUCCESS);
 

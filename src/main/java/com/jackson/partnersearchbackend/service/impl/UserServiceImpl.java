@@ -126,7 +126,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         //4. 用户脱敏
-        User anonymizedUser = getSafetyUser(user);
+        User anonymizedUser = new User();
+        anonymizedUser.setId(user.getId());
 
         //5. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, anonymizedUser);

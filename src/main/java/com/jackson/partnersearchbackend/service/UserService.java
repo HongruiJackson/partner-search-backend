@@ -66,4 +66,20 @@ public interface UserService extends IService<User> {
      * @return 搜索到的用户信息
      */
     List<User> searchUserByTags(List<String> tags);
+
+
+    /**
+     * 当用户登录后获取信息
+     * @param request 请求体
+     * @return 存储在session中的信息
+     */
+    User getLoginUser(HttpServletRequest request);
+
+    /**
+     * 更新用户
+     * @param user 新的用户，即修改值
+     * @param loginUser 在登录当中的用户
+     * @return 数据库结果，当且仅当为1的时候修改成功
+     */
+    int updateUser(User user, User loginUser);
 }

@@ -192,6 +192,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         else return new ArrayList<>();
 
     }
+
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObj == null) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        return (User) userObj;
+    }
+
+    @Override
+    public int updateUser(User user, User loginUser) {
+        long userId = loginUser.getId();
+        User oldUser = userMapper.selectById(userId);
+        if (oldUser == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        user.setId(userId);
+        return userMapper.updateById(user);
+    }
 }
 
 

@@ -153,6 +153,17 @@ public class UserController {
 
     }
 
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User userWithNewInfo, HttpServletRequest httpServletRequest) {
+        if (userWithNewInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        int result = userService.updateUser(userWithNewInfo, loginUser);
+        return ResultUtils.success(result,SuccessCode.COMMON_SUCCESS);
+
+    }
+
 
 
 }

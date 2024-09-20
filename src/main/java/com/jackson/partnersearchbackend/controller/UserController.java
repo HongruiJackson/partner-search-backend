@@ -155,7 +155,7 @@ public class UserController {
 
     @PostMapping("/update")
     public BaseResponse<Integer> updateUser(@RequestBody User userWithNewInfo, HttpServletRequest httpServletRequest) {
-        if (userWithNewInfo == null) {
+        if (userWithNewInfo == null || userWithNewInfo.getUserAccount() != null) { //不允许修改用户账号
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(httpServletRequest);

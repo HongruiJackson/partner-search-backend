@@ -21,7 +21,7 @@ import static com.jackson.partnersearchbackend.constant.UserConstant.USER_LOGIN_
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5173"})
+//@CrossOrigin(origins = {"http://localhost:5173"})
 public class UserController {
 
     @Resource

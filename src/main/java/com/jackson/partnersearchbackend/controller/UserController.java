@@ -1,5 +1,6 @@
 package com.jackson.partnersearchbackend.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jackson.partnersearchbackend.common.BaseResponse;
 import com.jackson.partnersearchbackend.enums.ErrorCode;
 import com.jackson.partnersearchbackend.enums.SuccessCode;
@@ -161,6 +162,15 @@ public class UserController {
         User loginUser = userService.getLoginUser(httpServletRequest);
         int result = userService.updateUser(userWithNewInfo, loginUser);
         return ResultUtils.success(result,SuccessCode.COMMON_SUCCESS);
+
+    }
+
+    @GetMapping("/recommend")
+    public BaseResponse<List<User>> recommendUserList() {
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        List<User> userList = userService.list(userQueryWrapper);
+        List<User> list = userList.stream().map(user -> userService.getSafetyUser(user)).toList();
+        return ResultUtils.success(list, SuccessCode.COMMON_SUCCESS);
 
     }
 

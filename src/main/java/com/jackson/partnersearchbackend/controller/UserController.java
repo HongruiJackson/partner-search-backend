@@ -1,6 +1,7 @@
 package com.jackson.partnersearchbackend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jackson.partnersearchbackend.common.BaseResponse;
 import com.jackson.partnersearchbackend.enums.ErrorCode;
 import com.jackson.partnersearchbackend.enums.SuccessCode;
@@ -154,6 +155,12 @@ public class UserController {
 
     }
 
+    /**
+     * 更新用户信息
+     * @param userWithNewInfo 新的用户信息
+     * @param httpServletRequest 请求体，找cookie
+     * @return 修改情况1代表修改成功，0代表修改无效
+     */
     @PostMapping("/update")
     public BaseResponse<Integer> updateUser(@RequestBody User userWithNewInfo, HttpServletRequest httpServletRequest) {
         if (userWithNewInfo == null || userWithNewInfo.getUserAccount() != null) { //不允许修改用户账号
@@ -165,12 +172,21 @@ public class UserController {
 
     }
 
+    /**
+     * 主页推荐用户信息
+     * @param page 页码
+     * @param size 单页大小
+     * @return 一页的信息
+     */
     @GetMapping("/recommend")
-    public BaseResponse<List<User>> recommendUserList() {
+    public BaseResponse<Page<User>> recommendUserList(long page, long size) {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        List<User> userList = userService.list(userQueryWrapper);
+        //MP的page代表的是页号，不是下标
+        Page<User> userPage = userService.page(new Page<>(page, size), userQueryWrapper);
+        List<User> userList = userPage.getRecords();
         List<User> list = userList.stream().map(user -> userService.getSafetyUser(user)).toList();
-        return ResultUtils.success(list, SuccessCode.COMMON_SUCCESS);
+        userPage.setRecords(list);
+        return ResultUtils.success(userPage, SuccessCode.COMMON_SUCCESS);
 
     }
 

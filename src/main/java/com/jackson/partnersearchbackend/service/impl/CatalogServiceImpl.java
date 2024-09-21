@@ -6,6 +6,8 @@ import com.jackson.partnersearchbackend.service.CatalogService;
 import com.jackson.partnersearchbackend.mapper.CatalogMapper;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
 * @author 10240
 * @description 针对表【catalog(类别表)】的数据库操作Service实现
@@ -15,6 +17,13 @@ import org.springframework.stereotype.Service;
 public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, Catalog>
     implements CatalogService{
 
+    @Resource
+    private CatalogMapper catalogMapper;
+
+    @Override
+    public Catalog getCatalogItem(int id) {
+        return catalogMapper.selectById(id);
+    }
 }
 
 

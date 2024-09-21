@@ -10,4 +10,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface CatalogService extends IService<Catalog> {
 
+    /**
+     * 根据id查询的类别项
+     * @param id 类别的id
+     * @return
+     */
+    Catalog getCatalogItem(int id);
 }

@@ -3,6 +3,7 @@ package com.jackson.partnersearchbackend.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import com.jackson.partnersearchbackend.constant.GlobalConstant;
 import com.jackson.partnersearchbackend.manager.CompletedCatalogManager;
 import com.jackson.partnersearchbackend.model.vo.CompletedCatalogVo;
 import com.jackson.partnersearchbackend.service.CompletedCatalogService;
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+
+import static com.jackson.partnersearchbackend.constant.GlobalConstant.GLOBAL_REDIS_KEY;
+import static com.jackson.partnersearchbackend.constant.TagConstant.TAG_LIST_REDIS_KEY;
 
 @Service
 @Slf4j
@@ -28,7 +32,7 @@ public class CompletedCatalogServiceImpl implements CompletedCatalogService {
 
     @Override
     public List<CompletedCatalogVo> getCompletedCatalogList()  {
-        String stringList = stringRedisTemplate.opsForValue().get("partner_search:tag:list");
+        String stringList = stringRedisTemplate.opsForValue().get(GLOBAL_REDIS_KEY+TAG_LIST_REDIS_KEY);
         if (stringList==null) {
             List<CompletedCatalogVo> completedCatalogList = completedCatalogManager.getCompletedCatalogList();
             try {

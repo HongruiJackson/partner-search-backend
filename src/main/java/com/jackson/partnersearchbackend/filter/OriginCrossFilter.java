@@ -14,8 +14,8 @@ public class OriginCrossFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String allowOrigin = request.getHeader("Origin");
         String allowHeader = request.getHeader("Access-Control-Request-Headers");
-        System.out.println(allowOrigin);
-        System.out.println(allowHeader);
+//        System.out.println(allowOrigin);
+//        System.out.println(allowHeader);
         response.setHeader("Access-Control-Allow-Origin", allowOrigin);
         //设置允许带cookie的请求
         response.setHeader("Access-Control-Allow-Credentials", "true");

@@ -16,6 +16,7 @@ import java.util.List;
 
 import static com.jackson.partnersearchbackend.constant.GlobalConstant.GLOBAL_REDIS_KEY;
 import static com.jackson.partnersearchbackend.constant.TagConstant.TAG_LIST_REDIS_KEY;
+import static com.jackson.partnersearchbackend.constant.TagConstant.TAG_REDIS_KEY;
 
 @Service
 @Slf4j
@@ -32,11 +33,12 @@ public class CompletedCatalogServiceImpl implements CompletedCatalogService {
 
     @Override
     public List<CompletedCatalogVo> getCompletedCatalogList()  {
-        String stringList = stringRedisTemplate.opsForValue().get(GLOBAL_REDIS_KEY+TAG_LIST_REDIS_KEY);
+        String redisKey = GLOBAL_REDIS_KEY+TAG_REDIS_KEY+TAG_LIST_REDIS_KEY;
+        String stringList = stringRedisTemplate.opsForValue().get(redisKey);
         if (stringList==null) {
             List<CompletedCatalogVo> completedCatalogList = completedCatalogManager.getCompletedCatalogList();
             try {
-                stringRedisTemplate.opsForValue().set("partner_search:tag:list",mapper.writeValueAsString(completedCatalogList));
+                stringRedisTemplate.opsForValue().set(redisKey,mapper.writeValueAsString(completedCatalogList));
             } catch (JsonProcessingException e) {
                 log.error("缓存插入失败，可能是JSON序列化的问题");
 //                throw new RuntimeException(e);

@@ -2,7 +2,9 @@ package com.jackson.partnersearchbackend.model.vo;
 
 import com.jackson.partnersearchbackend.model.domain.Catalog;
 import com.jackson.partnersearchbackend.model.domain.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -10,6 +12,8 @@ import java.util.List;
  * 主要是为了配合前端的数据类型
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CompletedCatalogVo {
     private String text;
     private List<childrenItem> children;
@@ -21,6 +25,8 @@ public class CompletedCatalogVo {
 }
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 class childrenItem {
     private String text;
     private String id;

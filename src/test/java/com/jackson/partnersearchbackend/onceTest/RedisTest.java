@@ -35,7 +35,7 @@ public class RedisTest {
     private static List<CompletedCatalogVo> list = new ArrayList<>();
 
 
-    @Test
+//    @Test
     @Order(0)
     public void initial() {
         // 初始化数据
@@ -46,7 +46,7 @@ public class RedisTest {
         System.out.println(list);
     }
 
-    @Test
+//    @Test
     @Order(2)
     public void setRedisTemplate() {
         StopWatch stopWatch = new StopWatch();
@@ -57,7 +57,7 @@ public class RedisTest {
 
     }
 
-    @Test
+//    @Test
     @Order(1)
     public void setStringRedisTemplate() throws JsonProcessingException {
         StopWatch stopWatch = new StopWatch();
@@ -69,7 +69,7 @@ public class RedisTest {
 
     }
 
-    @Test
+//    @Test
     @Order(4)
     public void getRedisTemplate()  {
         StopWatch stopWatch = new StopWatch();

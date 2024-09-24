@@ -33,7 +33,7 @@ public class CompletedCatalogManagerImpl implements CompletedCatalogManager {
             LambdaQueryWrapper<Tag> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Tag::getCatalogItemId,catalog.getId());
             List<Tag> tagList = tagMapper.selectList(queryWrapper);
-            if (tagList!=null) completedCatalogVoList.add(new CompletedCatalogVo(catalog,tagList));
+            if (tagList!=null) completedCatalogVoList.add(CompletedCatalogVo.init(catalog,tagList));
         });
         return completedCatalogVoList;
 

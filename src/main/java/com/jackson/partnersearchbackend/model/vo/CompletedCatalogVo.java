@@ -16,24 +16,28 @@ import java.util.List;
 @AllArgsConstructor
 public class CompletedCatalogVo {
     private String text;
-    private List<childrenItem> children;
+    private List<ChildrenItem> children;
 
-    public CompletedCatalogVo(Catalog catalog, List<Tag> tagList) {
-        this.text = catalog.getCatalogItem();
-        this.children = tagList.stream().map(tag -> new childrenItem(tag.getTagName())).toList();
+    public static CompletedCatalogVo init(Catalog catalog, List<Tag> tagList) {
+        CompletedCatalogVo completedCatalogVo = new CompletedCatalogVo();
+        completedCatalogVo.setText(catalog.getCatalogItem());
+        completedCatalogVo.setChildren(tagList.stream().map(tag -> ChildrenItem.init(tag.getTagName())).toList());
+        return completedCatalogVo;
     }
 }
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class childrenItem {
+class ChildrenItem {
     private String text;
     private String id;
 
-    public childrenItem(String tagName) {
-        this.text = tagName;
-        this.id = tagName;
+    public static ChildrenItem init(String tagName) {
+        ChildrenItem childrenItem = new ChildrenItem();
+        childrenItem.setText(tagName);
+        childrenItem.setId(tagName);
+        return childrenItem;
     }
 
     @Override

@@ -153,6 +153,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         anonymizedUser.setEmail(user.getEmail());
         anonymizedUser.setUserStatus(user.getUserStatus());
         anonymizedUser.setUserRole(user.getUserRole());
+        anonymizedUser.setCreateTime(user.getCreateTime());
         return anonymizedUser;
     }
 

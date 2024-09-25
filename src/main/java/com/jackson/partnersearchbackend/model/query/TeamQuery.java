@@ -1,16 +1,17 @@
-package com.jackson.partnersearchbackend.query;
+package com.jackson.partnersearchbackend.model.query;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.jackson.partnersearchbackend.model.request.BasePageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
 /**
  * 查询封装类
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class TeamQuery {
+public class TeamQuery extends BasePageRequest {
     /**
      * 主键
      */
@@ -30,11 +31,6 @@ public class TeamQuery {
      * 最大人数
      */
     private Integer maxNum;
-
-    /**
-     * 过期时间
-     */
-    private Date expireTime;
 
     /**
      * 创建人id

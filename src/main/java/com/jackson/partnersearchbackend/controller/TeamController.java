@@ -7,8 +7,11 @@ import com.jackson.partnersearchbackend.enums.ErrorCode;
 import com.jackson.partnersearchbackend.enums.SuccessCode;
 import com.jackson.partnersearchbackend.exception.BusinessException;
 import com.jackson.partnersearchbackend.model.domain.Team;
+import com.jackson.partnersearchbackend.model.domain.User;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
+import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
 import com.jackson.partnersearchbackend.service.TeamService;
+import com.jackson.partnersearchbackend.service.UserService;
 import com.jackson.partnersearchbackend.utils.ResultUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -26,16 +29,17 @@ public class TeamController {
     @Resource
     private TeamService teamService;
 
+    @Resource
+    private UserService userService;
+
     @PostMapping("/add")
-    public BaseResponse<Long> addTeam(@RequestBody Team team, HttpServletRequest httpServletRequest){
-        if (team == null) {
+    public BaseResponse<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest httpServletRequest){
+        if (teamAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean save = teamService.save(team);
-        if (!save) {
-            throw  new BusinessException(ErrorCode.SYSTEM_ERROR,"插入失败");
-        }
-        return ResultUtils.success(team.getId(), SuccessCode.COMMON_SUCCESS);
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        long teamId = teamService.addTeam(teamAddRequest,loginUser);
+        return ResultUtils.success(teamId, SuccessCode.COMMON_SUCCESS);
     }
 
     @PostMapping("/delete")

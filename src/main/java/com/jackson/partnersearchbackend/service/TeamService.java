@@ -3,9 +3,11 @@ package com.jackson.partnersearchbackend.service;
 import com.jackson.partnersearchbackend.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jackson.partnersearchbackend.model.domain.User;
+import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
+import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author 10240
@@ -21,4 +23,13 @@ public interface TeamService extends IService<Team> {
      * @return 添加成功的teamId
      */
     long addTeam(TeamAddRequest teamAddRequest, User loginUser);
+
+    /**
+     * 搜索队伍
+     *
+     * @param teamQuery 队伍查询条件
+     * @param isAdmin 是否是管理员
+     * @return 查到的队伍以及包含的加入的成员
+     */
+    List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin);
 }

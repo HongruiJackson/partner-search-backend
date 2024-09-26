@@ -1,6 +1,7 @@
 package com.jackson.partnersearchbackend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jackson.partnersearchbackend.common.BaseResponse;
 import com.jackson.partnersearchbackend.enums.ErrorCode;
@@ -8,20 +9,26 @@ import com.jackson.partnersearchbackend.enums.SuccessCode;
 import com.jackson.partnersearchbackend.exception.BusinessException;
 import com.jackson.partnersearchbackend.model.domain.Team;
 import com.jackson.partnersearchbackend.model.domain.User;
+import com.jackson.partnersearchbackend.model.domain.UserTeam;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
+import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 import com.jackson.partnersearchbackend.service.TeamService;
 import com.jackson.partnersearchbackend.service.UserService;
+import com.jackson.partnersearchbackend.service.UserTeamService;
 import com.jackson.partnersearchbackend.utils.ResultUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.jackson.partnersearchbackend.constant.UserConstant.ADMIN_ROLE;
+
+@Slf4j
 @RestController
 @RequestMapping("/team")
 public class TeamController {
@@ -32,6 +39,15 @@ public class TeamController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private UserTeamService userTeamService;
+
+    /**
+     * 创建队伍
+     * @param teamAddRequest 创建队伍请求体
+     * @param httpServletRequest http请求体
+     * @return 创建成功为新增队伍的id
+     */
     @PostMapping("/add")
     public BaseResponse<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest httpServletRequest){
         if (teamAddRequest == null) {
@@ -79,16 +95,38 @@ public class TeamController {
     }
 
     @PostMapping("/list")
-    public BaseResponse<List<Team>> listTeam(@RequestBody TeamQuery teamQuery) {
+    public BaseResponse<List<TeamUserVO>> listTeam(@RequestBody TeamQuery teamQuery,HttpServletRequest httpServletRequest) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Team team = new Team();
-        BeanUtils.copyProperties(teamQuery,team);
-        LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.setEntity(team);
-        List<Team> list = teamService.list(queryWrapper);
-        return ResultUtils.success(Objects.requireNonNullElseGet(list, ArrayList::new), SuccessCode.COMMON_SUCCESS);
+        Integer userRole = userService.getLoginUser(httpServletRequest).getUserRole();
+        boolean isAdmin = userRole == ADMIN_ROLE;
+        List<TeamUserVO> teamList = teamService.listTeams(teamQuery,isAdmin);
+        final List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
+        // 2、判断当前用户是否已加入队伍
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        userTeamQueryWrapper.eq("user_id", loginUser.getId());
+        userTeamQueryWrapper.in("team_id", teamIdList);
+        List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+        // 已加入的队伍 id 集合
+        Set<Long> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+        teamList.forEach(team -> {
+            boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+            team.setHasJoin(hasJoin);
+        });
+
+        // 3、查询已加入队伍的人数
+        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
+        userTeamJoinQueryWrapper.in("team_id", teamIdList);
+        List<UserTeam> teams = userTeamService.list(userTeamJoinQueryWrapper);
+        // 队伍 id => 加入这个队伍的用户列表
+        Map<Long, List<UserTeam>> teamIdUserTeamList = teams.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+        teamList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size()));
+        return ResultUtils.success(teamList,SuccessCode.COMMON_SUCCESS);
+
+
+
 
     }
 

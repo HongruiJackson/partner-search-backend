@@ -12,6 +12,7 @@ import com.jackson.partnersearchbackend.model.domain.User;
 import com.jackson.partnersearchbackend.model.domain.UserTeam;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
+import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 import com.jackson.partnersearchbackend.service.TeamService;
 import com.jackson.partnersearchbackend.service.UserService;
@@ -71,16 +72,25 @@ public class TeamController {
         return ResultUtils.success(true, SuccessCode.COMMON_SUCCESS);
     }
 
+    /**
+     * 更新队伍信息
+     * @param teamUpdateRequest 队伍更新信息
+     * @param httpServletRequest 请求体
+     * @return 更新结果，成功为true，否则为false
+     */
     @PostMapping("/update")
-    public BaseResponse<Long> updateTeam(@RequestBody Team team, HttpServletRequest httpServletRequest){
-        if (team == null) {
+    public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest httpServletRequest){
+        if (teamUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean update = teamService.updateById(team);
+        User loginUser = userService.getLoginUser(httpServletRequest);
+
+        // 实际更新操作
+        boolean update = teamService.updateTeam(teamUpdateRequest,loginUser);
         if (!update) {
             throw  new BusinessException(ErrorCode.SYSTEM_ERROR,"更新失败");
         }
-        return ResultUtils.success(team.getId(), SuccessCode.COMMON_SUCCESS);
+        return ResultUtils.success(true, SuccessCode.COMMON_SUCCESS);
     }
 
     @GetMapping("/get")
@@ -95,6 +105,12 @@ public class TeamController {
         return ResultUtils.success(team, SuccessCode.COMMON_SUCCESS);
     }
 
+    /**
+     * 查询队伍
+     * @param teamQuery 查询条件
+     * @param httpServletRequest 请求体
+     * @return 队伍列表
+     */
     @PostMapping("/list")
     public BaseResponse<List<TeamUserVO>> listTeam(@RequestBody TeamQuery teamQuery,HttpServletRequest httpServletRequest) {
         if (teamQuery == null) {

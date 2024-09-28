@@ -12,6 +12,7 @@ import com.jackson.partnersearchbackend.model.domain.User;
 import com.jackson.partnersearchbackend.model.domain.UserTeam;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
+import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 import com.jackson.partnersearchbackend.model.vo.UserVO;
 import com.jackson.partnersearchbackend.service.TeamService;
@@ -20,11 +21,14 @@ import com.jackson.partnersearchbackend.service.UserService;
 import com.jackson.partnersearchbackend.service.UserTeamService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
+
+import static com.jackson.partnersearchbackend.constant.UserConstant.ADMIN_ROLE;
 
 /**
 * @author 10240
@@ -190,6 +194,31 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             teamUserVOList.add(teamUserVO);
         }
         return teamUserVOList;
+    }
+
+    @Override
+    public boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser) {
+        Long teamId = teamUpdateRequest.getId();
+        Team team = this.getById(teamId);
+        if (team == null) throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍不存在");
+        // 只有队伍创建者或管理员才能对队伍信息进行修改
+        if (!Objects.equals(team.getUserId(), loginUser.getId()) && loginUser.getUserRole()!=ADMIN_ROLE)
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        // 修改为加密状态必须要有密码
+        Integer teamStatus = teamUpdateRequest.getTeamStatus();
+        if (teamStatus != null) {
+            TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(teamStatus);
+            if (statusEnum.equals(TeamStatusEnum.SECRET)) {
+                // 如果之前不是加密的且没有传密码的话报错
+                if (TeamStatusEnum.getEnumByValue(team.getTeamStatus())!=TeamStatusEnum.PRIVATE && teamUpdateRequest.getTeamPassword().isBlank()) {
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR,"未填写密码");
+                }
+            }
+        }
+
+        BeanUtils.copyProperties(teamUpdateRequest,team);
+        return this.updateById(team);
+
     }
 }
 

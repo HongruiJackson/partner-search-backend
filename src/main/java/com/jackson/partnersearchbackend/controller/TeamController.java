@@ -19,6 +19,7 @@ import com.jackson.partnersearchbackend.service.UserTeamService;
 import com.jackson.partnersearchbackend.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -102,6 +103,9 @@ public class TeamController {
         Integer userRole = userService.getLoginUser(httpServletRequest).getUserRole();
         boolean isAdmin = userRole == ADMIN_ROLE;
         List<TeamUserVO> teamList = teamService.listTeams(teamQuery,isAdmin);
+        // 原本就没有任何队伍直接返回空列表
+        if (CollectionUtils.isEmpty(teamList)) return ResultUtils.success(teamList,SuccessCode.COMMON_SUCCESS);
+
         final List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
         // 2、判断当前用户是否已加入队伍
         QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();

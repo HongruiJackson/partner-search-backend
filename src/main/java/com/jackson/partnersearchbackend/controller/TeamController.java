@@ -12,6 +12,7 @@ import com.jackson.partnersearchbackend.model.domain.User;
 import com.jackson.partnersearchbackend.model.domain.UserTeam;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
+import com.jackson.partnersearchbackend.model.request.TeamJoinRequest;
 import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 import com.jackson.partnersearchbackend.service.TeamService;
@@ -163,5 +164,15 @@ public class TeamController {
         Page<Team> pageList = teamService.page(page,queryWrapper);
         return ResultUtils.success(pageList, SuccessCode.COMMON_SUCCESS);
 
+    }
+
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest,HttpServletRequest httpServletRequest) {
+        if (teamJoinRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        boolean result = teamService.joinTeam(teamJoinRequest,loginUser);
+        return ResultUtils.success(result,SuccessCode.COMMON_SUCCESS);
     }
 }

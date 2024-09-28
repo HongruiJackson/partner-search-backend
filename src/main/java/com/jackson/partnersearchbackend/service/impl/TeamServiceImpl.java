@@ -12,6 +12,7 @@ import com.jackson.partnersearchbackend.model.domain.User;
 import com.jackson.partnersearchbackend.model.domain.UserTeam;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
+import com.jackson.partnersearchbackend.model.request.TeamJoinRequest;
 import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 import com.jackson.partnersearchbackend.model.vo.UserVO;
@@ -207,10 +208,10 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         // 修改为加密状态必须要有密码
         Integer teamStatus = teamUpdateRequest.getTeamStatus();
         if (teamStatus != null) {
-            TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(teamStatus);
+            TeamStatusEnum statusEnum = Objects.requireNonNullElse(TeamStatusEnum.getEnumByValue(teamStatus),TeamStatusEnum.PUBLIC);
             if (statusEnum.equals(TeamStatusEnum.SECRET)) {
                 // 如果之前不是加密的且没有传密码的话报错
-                if (TeamStatusEnum.getEnumByValue(team.getTeamStatus())!=TeamStatusEnum.PRIVATE && teamUpdateRequest.getTeamPassword().isBlank()) {
+                if (TeamStatusEnum.getEnumByValue(team.getTeamStatus())!=TeamStatusEnum.SECRET && StringUtils.isBlank(teamUpdateRequest.getTeamPassword())) {
                     throw new BusinessException(ErrorCode.PARAMS_ERROR,"未填写密码");
                 }
             }
@@ -219,6 +220,59 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         BeanUtils.copyProperties(teamUpdateRequest,team);
         return this.updateById(team);
 
+    }
+
+    @Override
+    @Transactional
+    public boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser) {
+        // 1. 获取队伍/用户id
+        Long teamId = teamJoinRequest.getId();
+        Long userId = loginUser.getId();
+        // 2. 队伍是否存在
+        Team team = this.getById(teamId);
+        if (team == null) throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍不存在");
+
+        // 3. 用户是否创建/加入5个队伍
+        LambdaQueryWrapper<UserTeam> userJoinCountWrapper = new LambdaQueryWrapper<>();
+        userJoinCountWrapper.eq(UserTeam::getUserId,userId);
+        if (userTeamService.count(userJoinCountWrapper)>=5) throw new BusinessException(ErrorCode.FORBIDDEN,"最多创建和加入5个队伍");
+
+        // 4. 不允许加入已过期队伍
+        if (team.getExpireTime()!=null && new Date().after(team.getExpireTime()))
+            throw new BusinessException(ErrorCode.FORBIDDEN,"队伍已过期");
+        // 5. 不允许加入私有队伍
+        TeamStatusEnum teamStatusEnum = TeamStatusEnum.getEnumByValue(team.getTeamStatus());
+        if (TeamStatusEnum.PRIVATE.equals(teamStatusEnum))
+            throw new BusinessException(ErrorCode.NO_AUTH,"不允许加入私有队伍");
+        // 6. 若队伍时加密的，必须密码匹配
+        String teamPassword = teamJoinRequest.getTeamPassword();
+        if (TeamStatusEnum.SECRET.equals(teamStatusEnum)) {
+            if (StringUtils.isBlank(teamPassword) || !teamPassword.equals(team.getTeamPassword())) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码错误");
+            }
+        }
+        // 7. 不能重复加入一队伍
+        LambdaQueryWrapper<UserTeam> reCountWrapper = new LambdaQueryWrapper<>();
+        reCountWrapper.eq(UserTeam::getTeamId,teamId)
+                .eq(UserTeam::getUserId,userId);
+        if (userTeamService.count(reCountWrapper)!=0) {
+            throw new BusinessException(ErrorCode.FORBIDDEN,"禁止重复加入");
+        }
+
+        // 8. 加入人数
+        LambdaQueryWrapper<UserTeam> hasJoinCountWrapper = new LambdaQueryWrapper<>();
+        hasJoinCountWrapper.eq(UserTeam::getTeamId,teamId);
+        long hasJoinCount = userTeamService.count(hasJoinCountWrapper);
+        if (team.getMaxNum() <= hasJoinCount) {
+            throw new BusinessException(ErrorCode.FORBIDDEN,"队伍已满");
+        }
+
+        // 9. 加入
+        UserTeam userTeam = new UserTeam();
+        userTeam.setUserId(userId);
+        userTeam.setTeamId(teamId);
+        userTeam.setJoinTime(new Date());
+        return userTeamService.save(userTeam);
     }
 }
 

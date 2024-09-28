@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.jackson.partnersearchbackend.model.domain.User;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
+import com.jackson.partnersearchbackend.model.request.TeamJoinRequest;
 import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 
@@ -35,11 +36,19 @@ public interface TeamService extends IService<Team> {
     List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin);
 
     /**
-     * 更新用户
+     * 更新队伍
      * 只允许管理员或者队伍创建者修改
      * @param teamUpdateRequest 修改的信息
      * @param loginUser 进行此操作的用户
      * @return 成功为true
      */
     boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
+
+    /**
+     * 加入队伍
+     * @param teamJoinRequest 加入队伍请求体
+     * @param loginUser 登录的用户
+     * @return 加入队伍成功为true，否则为false
+     */
+    boolean joinTeam(TeamJoinRequest teamJoinRequest,User loginUser);
 }

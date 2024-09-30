@@ -13,6 +13,7 @@ import com.jackson.partnersearchbackend.model.domain.UserTeam;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
 import com.jackson.partnersearchbackend.model.request.TeamJoinRequest;
+import com.jackson.partnersearchbackend.model.request.TeamQuitRequest;
 import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 import com.jackson.partnersearchbackend.model.vo.UserVO;
@@ -273,6 +274,75 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         userTeam.setTeamId(teamId);
         userTeam.setJoinTime(new Date());
         return userTeamService.save(userTeam);
+    }
+
+    @Override
+    public boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
+        // 1. 校验参数
+        if (Objects.isNull(teamQuitRequest)) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        // 2. 对id的校验，简单地防一下缓存穿透
+        Long teamId = teamQuitRequest.getId();
+        if (teamId == null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 3. 数据库获取team
+        Team team = this.getById(teamId);
+        if (Objects.isNull(team)) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"队伍不存在");
+        }
+        // 4. 判断是否在队伍当中
+        Long userId = loginUser.getId();
+        LambdaQueryWrapper<UserTeam> countWrapper = new LambdaQueryWrapper<>();
+        countWrapper.eq(UserTeam::getUserId,userId)
+                .eq(UserTeam::getTeamId,teamId);
+        long count = userTeamService.count(countWrapper);
+        if (count != 1) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未加入队伍");
+        }
+        long hasJoinCount = this.getHasJoinCount(teamId);
+        if (hasJoinCount == 1) { // 解散队伍
+            // 删除队伍和所有加入队伍的关系
+            this.removeById(teamId);
+            LambdaQueryWrapper<UserTeam> removeDeleteTeamIdWrapper = new LambdaQueryWrapper<>();
+            removeDeleteTeamIdWrapper.eq(UserTeam::getTeamId,teamId);
+            return userTeamService.remove(removeDeleteTeamIdWrapper);
+        } else {
+            // 是否为创建人
+            if (Objects.equals(team.getUserId(), userId)) {
+                // 是创建人顺位到下一个最早加入的人
+                // id是自增的，就找两个人就好了
+                LambdaQueryWrapper<UserTeam> twoPeopleWrapper = new LambdaQueryWrapper<>();
+                twoPeopleWrapper.eq(UserTeam::getTeamId,teamId)
+                        .orderByAsc(UserTeam::getId)
+                        .last("limit 2");
+                List<UserTeam> twoPeople = userTeamService.list(twoPeopleWrapper);
+                if (CollectionUtils.isEmpty(twoPeople) || twoPeople.size()!=2) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+                }
+                // 更新当前队伍创建人
+                UserTeam userTeam = twoPeople.get(1);
+                Long nextUserId = userTeam.getUserId();
+                Team updateTeam = new Team();
+                updateTeam.setId(teamId);
+                updateTeam.setUserId(nextUserId);
+                boolean updateTeamResult = this.updateById(updateTeam);
+                if (!updateTeamResult) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR,"更新队伍创建人失败");
+                }
+            }
+            // 移除关系
+            LambdaQueryWrapper<UserTeam> removeDeleteTeamIdWrapper = new LambdaQueryWrapper<>();
+            removeDeleteTeamIdWrapper.eq(UserTeam::getTeamId,teamId)
+                    .eq(UserTeam::getUserId,userId);
+            return userTeamService.remove(removeDeleteTeamIdWrapper);
+        }
+    }
+
+
+    private long getHasJoinCount(long teamId) {
+        LambdaQueryWrapper<UserTeam> userTeamLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userTeamLambdaQueryWrapper.eq(UserTeam::getTeamId,teamId);
+        return userTeamService.count(userTeamLambdaQueryWrapper);
     }
 }
 

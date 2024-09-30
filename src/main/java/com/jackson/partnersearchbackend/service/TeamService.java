@@ -6,6 +6,7 @@ import com.jackson.partnersearchbackend.model.domain.User;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
 import com.jackson.partnersearchbackend.model.request.TeamJoinRequest;
+import com.jackson.partnersearchbackend.model.request.TeamQuitRequest;
 import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 
@@ -51,4 +52,12 @@ public interface TeamService extends IService<Team> {
      * @return 加入队伍成功为true，否则为false
      */
     boolean joinTeam(TeamJoinRequest teamJoinRequest,User loginUser);
+
+    /**
+     * 退出队伍
+     * @param teamQuitRequest 退出队伍请求体
+     * @param loginUser 登录的用户
+     * @return 退出成功为true
+     */
+    boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
 }

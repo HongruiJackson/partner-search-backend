@@ -47,7 +47,6 @@ public class PreCacheJob {
         RLock redissonClientLock = redissonClient.getLock(lockKey);
 
         try {
-            //看门狗机制
             if (redissonClientLock.tryLock(0,1,TimeUnit.MINUTES)) {
                 String redisKey = GLOBAL_REDIS_KEY + TAG_REDIS_KEY + TAG_LIST_REDIS_KEY;
                 List<CompletedCatalogVo> completedCatalogList = completedCatalogManager.getCompletedCatalogList();

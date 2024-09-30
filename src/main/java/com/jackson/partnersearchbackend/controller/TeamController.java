@@ -13,6 +13,7 @@ import com.jackson.partnersearchbackend.model.domain.UserTeam;
 import com.jackson.partnersearchbackend.model.query.TeamQuery;
 import com.jackson.partnersearchbackend.model.request.TeamAddRequest;
 import com.jackson.partnersearchbackend.model.request.TeamJoinRequest;
+import com.jackson.partnersearchbackend.model.request.TeamQuitRequest;
 import com.jackson.partnersearchbackend.model.request.TeamUpdateRequest;
 import com.jackson.partnersearchbackend.model.vo.TeamUserVO;
 import com.jackson.partnersearchbackend.service.TeamService;
@@ -166,6 +167,12 @@ public class TeamController {
 
     }
 
+    /**
+     * 加入队伍
+     * @param teamJoinRequest 队伍加入请求体
+     * @param httpServletRequest 请求体
+     * @return 里面包含的数据是加入的情况
+     */
     @PostMapping("/join")
     public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest,HttpServletRequest httpServletRequest) {
         if (teamJoinRequest == null) {
@@ -173,6 +180,22 @@ public class TeamController {
         }
         User loginUser = userService.getLoginUser(httpServletRequest);
         boolean result = teamService.joinTeam(teamJoinRequest,loginUser);
+        return ResultUtils.success(result,SuccessCode.COMMON_SUCCESS);
+    }
+
+    /**
+     * 退出队伍
+     * @param teamQuitRequest 队伍退出请求体
+     * @param httpServletRequest 请求体
+     * @return 里面包含的数据为退出结果
+     */
+    @PostMapping("/quit")
+    public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest,HttpServletRequest httpServletRequest) {
+        if (teamQuitRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        boolean result = teamService.quitTeam(teamQuitRequest,loginUser);
         return ResultUtils.success(result,SuccessCode.COMMON_SUCCESS);
     }
 }

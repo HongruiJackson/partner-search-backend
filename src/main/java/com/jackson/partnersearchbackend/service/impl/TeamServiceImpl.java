@@ -277,6 +277,7 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
         // 1. 校验参数
         if (Objects.isNull(teamQuitRequest)) throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -336,6 +337,31 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                     .eq(UserTeam::getUserId,userId);
             return userTeamService.remove(removeDeleteTeamIdWrapper);
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteTeam(Long id, User loginUser) {
+        if (id == null || id<=0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Team team = this.getById(id);
+        if (team == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"队伍不存在");
+        }
+        // 如果不是创建者且不是管理员
+        if (!loginUser.getId().equals(team.getUserId()) && loginUser.getUserRole() != ADMIN_ROLE) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        // 移除所有信息
+        LambdaQueryWrapper<UserTeam> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(UserTeam::getTeamId,id);
+        boolean remove = this.removeById(id);
+        if (!remove) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"检查数据库日志");
+        }
+        return userTeamService.remove(lambdaQueryWrapper);
+
     }
 
 

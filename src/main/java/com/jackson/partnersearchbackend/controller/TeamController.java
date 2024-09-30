@@ -62,12 +62,19 @@ public class TeamController {
         return ResultUtils.success(teamId, SuccessCode.COMMON_SUCCESS);
     }
 
+    /**
+     * 解除队伍
+     * @param id 队伍id
+     * @param httpServletRequest 请求体
+     * @return 返回删除结果，返回即为true，否则报错
+     */
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteTeam(@RequestBody long id, HttpServletRequest httpServletRequest){
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean remove = teamService.removeById(id);
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        boolean remove = teamService.deleteTeam(id,loginUser);
         if (!remove) {
             throw  new BusinessException(ErrorCode.SYSTEM_ERROR,"删除失败");
         }

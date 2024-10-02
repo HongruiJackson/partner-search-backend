@@ -22,6 +22,12 @@ public class OriginCrossFilter implements Filter {
         response.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST, PUT, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Allow-Headers", allowHeader);
 
-        filterChain.doFilter(servletRequest, servletResponse);
+        // 处理预检请求
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            // 继续处理其他类型的请求
+            filterChain.doFilter(servletRequest, servletResponse);
+        }
     }
 }

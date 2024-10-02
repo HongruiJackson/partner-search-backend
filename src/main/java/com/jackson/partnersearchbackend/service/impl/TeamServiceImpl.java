@@ -95,13 +95,10 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (new Date().after(expireTime)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"超时时间 > 当前时间");
         }
-        // 3.7 校验用户最多创建5个队伍
-        LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Team::getUserId,teamAddRequest.getUserId());
-        Long count = teamMapper.selectCount(queryWrapper);
-        if (count >= 5) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户最多创建5个队伍");
-        }
+        // 3.7 校验用户最多创建/加入5个队伍
+        LambdaQueryWrapper<UserTeam> userJoinCountWrapper = new LambdaQueryWrapper<>();
+        userJoinCountWrapper.eq(UserTeam::getUserId,loginUser.getId());
+        if (userTeamService.count(userJoinCountWrapper)>=5) throw new BusinessException(ErrorCode.FORBIDDEN,"最多创建和加入5个队伍");
         // 4 插入队伍信息到队伍表
         teamAddRequest.setUserId(loginUser.getId());
         Team team = new Team();

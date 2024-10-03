@@ -3,6 +3,7 @@ package com.jackson.partnersearchbackend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jackson.partnersearchbackend.enums.ErrorCode;
 import com.jackson.partnersearchbackend.enums.TeamStatusEnum;
@@ -122,7 +123,7 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin) {
+    public Page<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin) {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         // 组合查询条件
         if (teamQuery != null) {
@@ -170,9 +171,14 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         // 不展示已过期的队伍
         // expireTime is null or expireTime > now()
         queryWrapper.and(qw -> qw.gt("expire_time", new Date()).or().isNull("expire_time"));
-        List<Team> teamList = this.list(queryWrapper);
+        Page<Team> OriginPage = this.page(new Page<>(teamQuery.getPageNum(), teamQuery.getPageSize()), queryWrapper);
+        Page<TeamUserVO> teamUserVOPage = new Page<>();
+        BeanUtils.copyProperties(OriginPage,teamUserVOPage,"records");
+
+        List<Team> teamList = OriginPage.getRecords();
         if (CollectionUtils.isEmpty(teamList)) {
-            return new ArrayList<>();
+            teamUserVOPage.setRecords(new ArrayList<>());
+            return teamUserVOPage;
         }
         List<TeamUserVO> teamUserVOList = new ArrayList<>();
         // 关联查询创建人的用户信息
@@ -192,7 +198,8 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             }
             teamUserVOList.add(teamUserVO);
         }
-        return teamUserVOList;
+        teamUserVOPage.setRecords(teamUserVOList);
+        return teamUserVOPage;
     }
 
     @Override

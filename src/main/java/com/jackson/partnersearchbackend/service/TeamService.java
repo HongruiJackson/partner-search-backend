@@ -1,5 +1,6 @@
 package com.jackson.partnersearchbackend.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jackson.partnersearchbackend.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jackson.partnersearchbackend.model.domain.User;
@@ -34,7 +35,7 @@ public interface TeamService extends IService<Team> {
      * @param isAdmin 是否是管理员
      * @return 查到的队伍以及包含的加入的成员
      */
-    List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin);
+    Page<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin);
 
     /**
      * 更新队伍

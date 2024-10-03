@@ -121,15 +121,17 @@ public class TeamController {
      * @return 队伍列表
      */
     @PostMapping("/list")
-    public BaseResponse<List<TeamUserVO>> listTeam(@RequestBody TeamQuery teamQuery,HttpServletRequest httpServletRequest) {
+    public BaseResponse<Page<TeamUserVO>> listTeam(@RequestBody TeamQuery teamQuery,HttpServletRequest httpServletRequest) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        if (teamQuery.getPageNum() == null || teamQuery.getPageSize() == null)throw new BusinessException(ErrorCode.PARAMS_ERROR);
         Integer userRole = userService.getLoginUser(httpServletRequest).getUserRole();
         boolean isAdmin = userRole == ADMIN_ROLE;
-        List<TeamUserVO> teamList = teamService.listTeams(teamQuery,isAdmin);
+        Page<TeamUserVO> teamUserVOPage = teamService.listTeams(teamQuery, isAdmin);
+        List<TeamUserVO> teamList = teamUserVOPage.getRecords();
         // 原本就没有任何队伍直接返回空列表
-        if (CollectionUtils.isEmpty(teamList)) return ResultUtils.success(teamList,SuccessCode.COMMON_SUCCESS);
+        if (CollectionUtils.isEmpty(teamList)) return ResultUtils.success(teamUserVOPage,SuccessCode.COMMON_SUCCESS);
 
         final List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
         // 2、判断当前用户是否已加入队伍
@@ -152,7 +154,8 @@ public class TeamController {
         // 队伍 id => 加入这个队伍的用户列表
         Map<Long, List<UserTeam>> teamIdUserTeamList = teams.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
         teamList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size()));
-        return ResultUtils.success(teamList,SuccessCode.COMMON_SUCCESS);
+        teamUserVOPage.setRecords(teamList);
+        return ResultUtils.success(teamUserVOPage,SuccessCode.COMMON_SUCCESS);
 
 
 

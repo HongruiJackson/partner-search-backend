@@ -20,10 +20,6 @@ public class UserVO {
      */
     private String userAccount;
 
-    /**
-     * 密码
-     */
-    private String userPassword;
 
     /**
      * 用户具有的标签

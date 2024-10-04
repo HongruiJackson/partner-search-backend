@@ -123,7 +123,7 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public Page<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin) {
+    public Page<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin, boolean isMy) {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         // 组合查询条件
         if (teamQuery != null) {
@@ -174,9 +174,11 @@ class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             }
 
         }
-        // 不展示已过期的队伍
+        // 不展示已过期的队伍，如果是要查询自己创建/加入的队伍，过期了也应该查询出来
         // expireTime is null or expireTime > now()
-        queryWrapper.and(qw -> qw.gt("expire_time", new Date()).or().isNull("expire_time"));
+        if (!isMy) {
+            queryWrapper.and(qw -> qw.gt("expire_time", new Date()).or().isNull("expire_time"));
+        }
         Page<Team> OriginPage = this.page(new Page<>(teamQuery.getPageNum(), teamQuery.getPageSize()), queryWrapper);
         Page<TeamUserVO> teamUserVOPage = new Page<>();
         BeanUtils.copyProperties(OriginPage,teamUserVOPage,"records");

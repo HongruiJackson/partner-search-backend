@@ -119,12 +119,12 @@ public class TeamController {
     }
 
 
-    private Page<TeamUserVO> queryTeamList(TeamQuery teamQuery, HttpServletRequest httpServletRequest,boolean isAdmin) {
+    private Page<TeamUserVO> queryTeamList(TeamQuery teamQuery, HttpServletRequest httpServletRequest,boolean isAdmin, boolean isMy) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         if (teamQuery.getPageNum() == null || teamQuery.getPageSize() == null)throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        Page<TeamUserVO> teamUserVOPage = teamService.listTeams(teamQuery, isAdmin);
+        Page<TeamUserVO> teamUserVOPage = teamService.listTeams(teamQuery, isAdmin,isMy);
         List<TeamUserVO> teamList = teamUserVOPage.getRecords();
         // 原本就没有任何队伍直接返回空列表
         if (CollectionUtils.isEmpty(teamList)) return teamUserVOPage;
@@ -165,7 +165,7 @@ public class TeamController {
     public BaseResponse<Page<TeamUserVO>> listTeam(@RequestBody TeamQuery teamQuery,HttpServletRequest httpServletRequest) {
         Integer userRole = userService.getLoginUser(httpServletRequest).getUserRole();
         boolean isAdmin = userRole == ADMIN_ROLE;
-        Page<TeamUserVO> teamUserVOPage = queryTeamList(teamQuery, httpServletRequest,isAdmin);
+        Page<TeamUserVO> teamUserVOPage = queryTeamList(teamQuery, httpServletRequest,isAdmin,false);
         return ResultUtils.success(teamUserVOPage, SuccessCode.COMMON_SUCCESS);
 
     }
@@ -201,7 +201,7 @@ public class TeamController {
             List<Long> idList = joinedlist.stream().filter(id -> !createdListId.contains(id)).toList();
             teamQuery.setIdList(idList);
         }
-        Page<TeamUserVO> teamUserVOPage = this.queryTeamList(teamQuery, httpServletRequest,true);
+        Page<TeamUserVO> teamUserVOPage = this.queryTeamList(teamQuery, httpServletRequest,true,true);
         List<TeamUserVO> list = teamUserVOPage.getRecords();
         return ResultUtils.success(list, SuccessCode.COMMON_SUCCESS);
     }
@@ -217,7 +217,7 @@ public class TeamController {
         Long userId = loginUser.getId();
         TeamQuery teamQuery = new TeamQuery();
         teamQuery.setUserId(userId);
-        Page<TeamUserVO> teamUserVOPage = this.queryTeamList(teamQuery, httpServletRequest,true);
+        Page<TeamUserVO> teamUserVOPage = this.queryTeamList(teamQuery, httpServletRequest,true,true);
         List<TeamUserVO> list = teamUserVOPage.getRecords();
         return ResultUtils.success(list, SuccessCode.COMMON_SUCCESS);
     }

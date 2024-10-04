@@ -109,33 +109,25 @@ public class TeamController {
         }
         User loginUser = userService.getLoginUser(httpServletRequest);
         Team team = teamService.getById(id);
-        if (!Objects.equals(loginUser.getId(), team.getUserId())) {
-            throw new BusinessException(ErrorCode.NO_AUTH);
-        }
         if (team == null) {
             throw  new BusinessException(ErrorCode.NULL_ERROR,"未查询到相关信息");
+        }
+        if (!Objects.equals(loginUser.getId(), team.getUserId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
         }
         return ResultUtils.success(team, SuccessCode.COMMON_SUCCESS);
     }
 
-    /**
-     * 查询队伍
-     * @param teamQuery 查询条件
-     * @param httpServletRequest 请求体
-     * @return 队伍列表
-     */
-    @PostMapping("/list")
-    public BaseResponse<Page<TeamUserVO>> listTeam(@RequestBody TeamQuery teamQuery,HttpServletRequest httpServletRequest) {
+
+    private Page<TeamUserVO> queryTeamList(TeamQuery teamQuery, HttpServletRequest httpServletRequest,boolean isAdmin) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         if (teamQuery.getPageNum() == null || teamQuery.getPageSize() == null)throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        Integer userRole = userService.getLoginUser(httpServletRequest).getUserRole();
-        boolean isAdmin = userRole == ADMIN_ROLE;
         Page<TeamUserVO> teamUserVOPage = teamService.listTeams(teamQuery, isAdmin);
         List<TeamUserVO> teamList = teamUserVOPage.getRecords();
         // 原本就没有任何队伍直接返回空列表
-        if (CollectionUtils.isEmpty(teamList)) return ResultUtils.success(teamUserVOPage,SuccessCode.COMMON_SUCCESS);
+        if (CollectionUtils.isEmpty(teamList)) return teamUserVOPage;
 
         final List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
         // 2、判断当前用户是否已加入队伍
@@ -159,11 +151,75 @@ public class TeamController {
         Map<Long, List<UserTeam>> teamIdUserTeamList = teams.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
         teamList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size()));
         teamUserVOPage.setRecords(teamList);
-        return ResultUtils.success(teamUserVOPage,SuccessCode.COMMON_SUCCESS);
+        return teamUserVOPage;
+        
+    }
 
+    /**
+     * 查询队伍
+     * @param teamQuery 查询条件
+     * @param httpServletRequest 请求体
+     * @return 队伍列表
+     */
+    @PostMapping("/list")
+    public BaseResponse<Page<TeamUserVO>> listTeam(@RequestBody TeamQuery teamQuery,HttpServletRequest httpServletRequest) {
+        Integer userRole = userService.getLoginUser(httpServletRequest).getUserRole();
+        boolean isAdmin = userRole == ADMIN_ROLE;
+        Page<TeamUserVO> teamUserVOPage = queryTeamList(teamQuery, httpServletRequest,isAdmin);
+        return ResultUtils.success(teamUserVOPage, SuccessCode.COMMON_SUCCESS);
 
+    }
 
+    /**
+     * 获取加入但并非创建的队伍
+     * @param httpServletRequest
+     * @return
+     */
+    @GetMapping("/list/my/join")
+    public BaseResponse<List<TeamUserVO>> listJoinedTeam(HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        Long userId = loginUser.getId();
 
+        // 用户创建的队伍
+        LambdaQueryWrapper<Team> createdTeamQueryWrapper = new LambdaQueryWrapper<>();
+        createdTeamQueryWrapper.eq(Team::getUserId,userId);
+        List<Team> createdTeamList = teamService.list(createdTeamQueryWrapper);
+        Set<Long> createdListId = createdTeamList.stream().map(Team::getId).collect(Collectors.toSet());
+
+        // 用户加入和创建的队伍
+        LambdaQueryWrapper<UserTeam> joinedTeamQueryWrapper = new LambdaQueryWrapper<>();
+        joinedTeamQueryWrapper.eq(UserTeam::getUserId,userId);
+        List<UserTeam> joinedTeamList = userTeamService.list(joinedTeamQueryWrapper);
+        List<Long> joinedlist = joinedTeamList.stream().map(UserTeam::getTeamId).toList();
+
+        if (joinedlist.isEmpty()) return ResultUtils.success(new ArrayList<>(), SuccessCode.COMMON_SUCCESS);
+
+        TeamQuery teamQuery = new TeamQuery();
+        if (createdListId.isEmpty()) { // 没有创建队伍
+            teamQuery.setIdList(joinedlist);
+        } else { // 有创建队伍进行剔除
+            List<Long> idList = joinedlist.stream().filter(id -> !createdListId.contains(id)).toList();
+            teamQuery.setIdList(idList);
+        }
+        Page<TeamUserVO> teamUserVOPage = this.queryTeamList(teamQuery, httpServletRequest,true);
+        List<TeamUserVO> list = teamUserVOPage.getRecords();
+        return ResultUtils.success(list, SuccessCode.COMMON_SUCCESS);
+    }
+
+    /**
+     * 获取创建但并非加入的队伍
+     * @param httpServletRequest
+     * @return
+     */
+    @GetMapping("/list/my/create")
+    public BaseResponse<List<TeamUserVO>> listCreatedTeam(HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        Long userId = loginUser.getId();
+        TeamQuery teamQuery = new TeamQuery();
+        teamQuery.setUserId(userId);
+        Page<TeamUserVO> teamUserVOPage = this.queryTeamList(teamQuery, httpServletRequest,true);
+        List<TeamUserVO> list = teamUserVOPage.getRecords();
+        return ResultUtils.success(list, SuccessCode.COMMON_SUCCESS);
     }
 
     @PostMapping("/list/page")
@@ -212,4 +268,8 @@ public class TeamController {
         boolean result = teamService.quitTeam(teamQuitRequest,loginUser);
         return ResultUtils.success(result,SuccessCode.COMMON_SUCCESS);
     }
+
+
+
+
 }

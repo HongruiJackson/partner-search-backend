@@ -107,7 +107,11 @@ public class TeamController {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        User loginUser = userService.getLoginUser(httpServletRequest);
         Team team = teamService.getById(id);
+        if (!Objects.equals(loginUser.getId(), team.getUserId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
         if (team == null) {
             throw  new BusinessException(ErrorCode.NULL_ERROR,"未查询到相关信息");
         }

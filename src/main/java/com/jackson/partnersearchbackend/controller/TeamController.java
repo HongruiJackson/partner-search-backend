@@ -192,7 +192,8 @@ public class TeamController {
         List<UserTeam> joinedTeamList = userTeamService.list(joinedTeamQueryWrapper);
         List<Long> joinedlist = joinedTeamList.stream().map(UserTeam::getTeamId).toList();
 
-        if (joinedlist.isEmpty()) return ResultUtils.success(new ArrayList<>(), SuccessCode.COMMON_SUCCESS);
+        // 当用户有加入而并非创建的队伍的时候，用户加入和创建的队伍应该大于创建的队伍数，当不满足该条件的时候，返回空列表
+        if (joinedlist.size()<=createdListId.size()) return ResultUtils.success(new ArrayList<>(), SuccessCode.COMMON_SUCCESS);
 
         TeamQuery teamQuery = new TeamQuery();
         if (createdListId.isEmpty()) { // 没有创建队伍

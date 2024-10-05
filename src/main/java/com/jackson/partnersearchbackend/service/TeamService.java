@@ -33,7 +33,7 @@ public interface TeamService extends IService<Team> {
      *
      * @param teamQuery 队伍查询条件
      * @param isAdmin 是否是管理员
-     * @param isMy 是否与我相关，true的时候，忽视掉过期时间，false，需要过期时间
+     * @param isMy 是否与我相关，true的时候，忽视掉过期时间，能查到过期的队伍，false，不能查到过期的队伍
      * @return 查到的队伍以及包含的加入的成员
      */
     Page<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin, boolean isMy);

@@ -1,28 +1,21 @@
 server:
   port: 8080
 spring:
-  application:
-    name: partner-search
   # datasource config
   datasource:
-    url:
+    url: jdbc:mysql://192.168.71.128:3307/partner_search
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
   session:
-    timeout:  # session失效时间
+    timeout: 2592000  # session失效时间
     store-type: redis
   # redis config
   redis:
-    host:
-    port:
-    password:
+    host: 192.168.71.128
+    port: 6379
+    password: 123456
     database: 0
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
-      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
-

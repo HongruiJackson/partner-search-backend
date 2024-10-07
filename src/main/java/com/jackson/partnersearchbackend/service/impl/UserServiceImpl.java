@@ -122,7 +122,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //3.1 若用户不存在
         if (user == null) {
             log.info("login failed, user is not exited or wrong password");
-            throw new BusinessException(ErrorCode.NULL_ERROR,"用户不存在");
+            throw new BusinessException(ErrorCode.NULL_ERROR,"用户不存在或密码错误");
         }
 
         //4. 用户脱敏

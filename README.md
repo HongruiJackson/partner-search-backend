@@ -1,6 +1,12 @@
-#项目/伙伴匹配系统
-***
 # 1 项目介绍
+
+- 后端代码仓库：
+    - [HongruiJackson/partner-search-backend (github.com)](https://github.com/HongruiJackson/partner-search-backend)
+    - [Hongrui_Jackson/partner-search-backend (gitee.com)](https://gitee.com/JacksonZHR/partner-search-backend)
+- 前端代码仓库：
+    - [HongruiJackson/partner-search-frontend (github.com)](https://github.com/HongruiJackson/partner-search-frontend)
+    - [Hongrui_Jackson/partner-search-frontend (gitee.com)](https://gitee.com/JacksonZHR/partner-search-frontend)
+
 ## 1.1 项目概述
 该系统皆在建立一个平台，让用户能够找到志同道合的伙伴，通过用户自行的标签标记，能够让用户找到相似标签的伙伴；同时，系统也支持队伍招揽，以支持多人的团体活动
 
@@ -769,5 +775,27 @@ List<CompletedCatalogVo> o1 = mapper.readValue(s1, listType);
 
 # 6 个人项目总结
 
+1. 使用Redis实现分布式Session，解决集群间的登录态同步问题
+2. 对于项目中复杂的集合处理，如为队伍列表关联已加入队伍的用户，使用Stream API和Lambda表达式来简化编码
+3. 使用Redis缓存标签列表，且为了节省内存空间，并没有直接使用JSON序列化来处理value，而是统一使用String序列化器，手动完成序列化和反序列化
+4. 通过将tag字段设置为JSON类型，借助mybatis实现动态sql，调用sql函数实现根据标签搜索用户
+5. 通过使用Spring Scheduler定时任务来实现缓存的预热，并通过分布式锁保证多机部署时定时任务不会重复执行
+6. 使用Apifox插件自动生成后端接口文档，避免了人工编写维护文档的麻烦
 
 # 7 项目优化方向
+- [ ] 邀请人员加入
+    - 用邀请码的方式，邀请码放在redis当中，带过期时间，存邀请人和受邀人信息
+- [ ] 内置标签的更新
+    - 缓存一致性方案
+    - 谁能上传新的标签？什么标签可以上？
+- [ ] 用户匹配、推荐策略/算法
+    - 选择什么字段用来匹配
+    - 相似的判断
+- [ ] 队伍推荐
+    - 可以通过队伍里的人员进行推荐：是否需要提前存储每个队伍的性质
+- [ ] 测试数据生成和导入方案改进
+    - 找一些词典、数据集去组
+    - 并发导入数据
+- [ ] 分页自己进行封装
+- [ ] 参数校验的规范和封装，怎么解决不同类，不同参数都需要校验的情况，反射？编写接口，让实体类实现方法，貌似还是要用反射去获取当中的参数类型
+- [ ] 复杂的sql或想要复用的方法自己写，MP做参数校验的时候，会让代码看上去很冗余

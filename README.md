@@ -5,20 +5,32 @@
 该系统皆在建立一个平台，让用户能够找到志同道合的伙伴，通过用户自行的标签标记，能够让用户找到相似标签的伙伴；同时，系统也支持队伍招揽，以支持多人的团体活动
 
 ## 1.2 部分功能一览
-- 用户注册/登录/登出功能
+用户注册/登录/登出功能
+
 ![](./doc/img/partner_search_login.gif)
-- 用户信息编辑
+
+用户信息编辑
+
 ![](./doc/img/partner_search_edit_info.gif)
-- 用户个人标签管理
-	- 可以搜索标签
+
+用户个人标签管理，可以搜索标签
+
 ![](./doc/img/partner_search_tag_manage.gif)
-- 根据标签搜索用户
+
+根据标签搜索用户
+
 ![](./doc/img/partner_search_user_search.gif)
-- 加入/退出/解散队伍
+
+加入/退出/解散队伍
+
 ![](./doc/img/partner_search_team_add.gif)
-- 创建队伍
+
+创建队伍
+
 ![](./doc/img/partner_search_team_create.gif)
-- 搜索队伍
+
+搜索队伍
+
 ![](./doc/img/partner_search_team_search.gif)
 
 

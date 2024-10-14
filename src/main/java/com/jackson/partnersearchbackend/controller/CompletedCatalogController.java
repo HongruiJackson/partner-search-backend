@@ -13,7 +13,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tag")
+@RequestMapping("/api/tag")
 public class CompletedCatalogController {
     @Resource
     CompletedCatalogService completedCatalogService;

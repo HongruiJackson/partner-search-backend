@@ -34,7 +34,7 @@ import static com.jackson.partnersearchbackend.constant.UserConstant.ADMIN_ROLE;
 
 @Slf4j
 @RestController
-@RequestMapping("/team")
+@RequestMapping("/api/team")
 public class TeamController {
 
     @Resource

@@ -22,7 +22,7 @@ import static com.jackson.partnersearchbackend.constant.UserConstant.ADMIN_ROLE;
 import static com.jackson.partnersearchbackend.constant.UserConstant.USER_LOGIN_STATE;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 //@CrossOrigin(origins = {"http://localhost:5173"})
 public class UserController {
 

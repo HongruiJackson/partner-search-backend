@@ -16,6 +16,6 @@ public class SpringMvcConfig implements WebMvcConfigurer{
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(userInterceptor).addPathPatterns("/**").excludePathPatterns("/user/login","/user/register");
+        registry.addInterceptor(userInterceptor).addPathPatterns("/**").excludePathPatterns("/api/user/login","/api/user/register");
     }
 }
